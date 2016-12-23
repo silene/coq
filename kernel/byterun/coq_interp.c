@@ -877,7 +877,7 @@ value coq_interprete
 	print_instr("PROJ");
 	if (Is_accu (accu)) {
           if (accu == accumulate_block) {
-            pc += 2;
+            ++pc;
           } else {
           *--sp = accu; // Save matched block on stack
           accu = Field(accu, 1); // Save atom to accu register
@@ -912,13 +912,12 @@ value coq_interprete
             {
               accu = accumulate_block;
               ++sp;
-              pc += 2;
+              ++pc;
             }
           }
           }
 	} else {
-          accu = Field(accu, *pc);
-          pc += 2;
+          accu = Field(accu, *pc++);
 	}
 	Next;
       }

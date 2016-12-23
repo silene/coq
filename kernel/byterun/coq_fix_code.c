@@ -58,10 +58,10 @@ void init_arity () {
     arity[MAKEACCU]=arity[CONSTINT]=arity[PUSHCONSTINT]=arity[GRABREC]=
     arity[PUSHFIELDS]=arity[GETFIELD]=arity[SETFIELD]=
     arity[BRANCH]=arity[ISCONST]=arity[ENSURESTACKCAPACITY]=
-    arity[MAKESWITCHBLOCK]=1;
+    arity[MAKESWITCHBLOCK]=arity[PROJ]=1;
   /* instruction with two operands */
   arity[APPTERM]=arity[MAKEBLOCK]=arity[CLOSURE]=
-  arity[ARECONST]=arity[PROJ]=2;
+  arity[ARECONST]=2;
   /* instruction with arbitrary operands */
   arity[CLOSUREREC]=arity[CLOSURECOFIX]=arity[SWITCH]=0;
 }

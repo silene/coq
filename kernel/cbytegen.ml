@@ -604,7 +604,7 @@ let rec compile_constr reloc c sz cont =
      let cb = lookup_constant kn !global_env in
      let pb = Option.get cb.const_proj in
      let n = pb.proj_arg in
-     compile_constr reloc c sz (Kproj (n,kn) :: cont)
+     compile_constr reloc c sz (Kproj n :: cont)
 
   | Cast(c,_,_) -> compile_constr reloc c sz cont
 
