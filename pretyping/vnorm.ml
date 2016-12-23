@@ -182,6 +182,7 @@ and nf_whd env whd typ =
   | Vatom_stk(Atype u, stk) -> assert false
   | Vuniv_level lvl ->
     assert false
+  | Vaccu -> assert false
 
 and nf_univ_args ~nb_univs mk env stk =
   let u =

@@ -15,6 +15,7 @@
 #include "coq_fix_code.h"
 #include "coq_memory.h"
 #include "coq_interp.h"
+#include "coq_values.h"
 
 /* stack */
 
@@ -35,6 +36,7 @@ long coq_saved_sp_offset;
 value * coq_sp;
 /* Some predefined pointer code */ 
 code_t accumulate;
+value accumulate_block;
 
 /* functions over global environment */
 
@@ -103,6 +105,7 @@ static int coq_vm_initialized = 0;
 
 value init_coq_vm(value unit) /* ML */
 {
+  char *ablock;
   if (coq_vm_initialized == 1) {
     fprintf(stderr,"already open \n");fflush(stderr);}
   else {
@@ -120,6 +123,12 @@ value init_coq_vm(value unit) /* ML */
     /* Some predefined pointer code */
     accumulate = (code_t) coq_stat_alloc(sizeof(opcode_t));
     *accumulate = VALINSTR(ACCUMULATE);
+
+    ablock = coq_stat_alloc(Bhsize_wosize(2));
+    Hd_hp(ablock) = Make_header(2, Accu_tag, Caml_black);
+    accumulate_block = Val_hp(ablock);
+    Code_val(accumulate_block) = accumulate;
+    Field(accumulate_block, 1) = 1;
 
   /* Initialize GC */
     if (coq_prev_scan_roots_hook == NULL)

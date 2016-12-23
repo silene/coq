@@ -50,6 +50,7 @@ and conv_whd env pb k whd1 whd2 cu =
      ** special cases in the code.
      **)
     assert false
+  | Vaccu, Vaccu -> assert false
   | Vprod p1, Vprod p2 ->
       let cu = conv_val env CONV k (dom p1) (dom p2) cu in
       conv_fun env pb k (codom p1) (codom p2) cu
@@ -81,7 +82,7 @@ and conv_whd env pb k whd1 whd2 cu =
       conv_val env CONV (k+1) (apply_whd k whd1) (apply_whd k whd2) cu
 
   | Vsort _, _ | Vprod _, _ | Vfix _, _ | Vcofix _, _  | Vconstr_const _, _
-  | Vconstr_block _, _ | Vatom_stk _, _ -> raise NotConvertible
+  | Vconstr_block _, _ | Vatom_stk _, _ | Vaccu, _ -> raise NotConvertible
 
 
 and conv_atom env pb k a1 stk1 a2 stk2 cu =

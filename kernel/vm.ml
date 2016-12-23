@@ -161,6 +161,7 @@ type whd =
   | Vconstr_block of vblock
   | Vatom_stk of atom * stack
   | Vuniv_level of Univ.universe_level
+  | Vaccu
 
 (************************************************)
 (* Abstract machine *****************************)
@@ -295,7 +296,8 @@ let whd_val : values -> whd =
     if Obj.is_int o then Vconstr_const (Obj.obj o)
     else
       let tag = Obj.tag o in
-      if tag = accu_tag then
+      if tag = Obj.out_of_heap_tag then Vaccu
+      else if tag = accu_tag then
 	(
 	if Int.equal (Obj.size o) 1 then Obj.obj o (* sort *)
         else
@@ -649,7 +651,7 @@ let apply_whd k whd =
       interprete (fun_code to_up) (Obj.magic to_up) (Obj.magic to_up) 0
   | Vatom_stk(a,stk) ->
       apply_stack (val_of_atom a) stk v 
-  | Vuniv_level lvl -> assert false
+  | Vuniv_level _ | Vaccu -> assert false
 
 let rec pr_atom a =
   Pp.(match a with
@@ -669,7 +671,8 @@ and pr_whd w =
   | Vconstr_const i -> str "Vconstr_const(" ++ int i ++ str ")"
   | Vconstr_block b -> str "Vconstr_block"
   | Vatom_stk (a,stk) -> str "Vatom_stk(" ++ pr_atom a ++ str ", " ++ pr_stack stk ++ str ")"
-  | Vuniv_level _ -> assert false)
+  | Vuniv_level _ -> str "Vuniv_level"
+  | Vaccu -> str "Vaccu")
 and pr_stack stk =
   Pp.(match stk with
       | [] -> str "[]"

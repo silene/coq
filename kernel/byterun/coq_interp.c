@@ -894,6 +894,9 @@ value coq_interprete
         do_proj:
 	print_instr("PROJ");
 	if (Is_accu (accu)) {
+          if (accu == accumulate_block) {
+            pc += 2;
+          } else {
           *--sp = accu; // Save matched block on stack
           accu = Field(accu, 1); // Save atom to accu register
           switch (Tag_val(accu)) {
@@ -938,6 +941,7 @@ value coq_interprete
               Field(block, 1) = accu;
               accu = block;
             }
+          }
           }
 	} else {
           accu = Field(accu, *pc);
@@ -995,11 +999,16 @@ value coq_interprete
       Instruct(ACCUMULATE) {
 	mlsize_t i, size;
 	print_instr("ACCUMULATE");
+        if (coq_env == accumulate_block) {
+          sp += 1 + coq_extra_args;
+          accu = accumulate_block;
+        } else {
 	size = Wosize_val(coq_env);
 	Alloc_small(accu, size + coq_extra_args + 1, Accu_tag);
 	for(i = 0; i < size; i++) Field(accu, i) = Field(coq_env, i);
 	for(i = size; i <= coq_extra_args + size; i++) 
 	  Field(accu, i) = *sp++;
+        }
 	pc = (code_t)(sp[0]);
 	coq_env = sp[1];
 	coq_extra_args = Long_val(sp[2]);
@@ -1008,6 +1017,9 @@ value coq_interprete
       }  
       Instruct(MAKESWITCHBLOCK) {
 	print_instr("MAKESWITCHBLOCK");
+        if (accu == accumulate_block) {
+          pc += 4;
+        } else {
 	*--sp = accu; // Save matched block on stack
 	accu = Field(accu,1); // Save atom to accu register
 	switch (Tag_val(accu)) {
@@ -1084,6 +1096,7 @@ value coq_interprete
 	    Field(accu,1) = *sp++;
 	  }
 	}
+        }
 	Next;
       }
 

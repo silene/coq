@@ -80,6 +80,7 @@ and ppwhd whd =
       open_hbox();ppatom a;close_box();
       print_string"@";ppstack s
   | Vuniv_level lvl -> Feedback.msg_notice (Univ.Level.pr lvl)
+  | Vaccu -> print_string "accu"
 
 and ppvblock b =
   open_hbox();

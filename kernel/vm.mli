@@ -47,6 +47,7 @@ type whd =
   | Vconstr_block of vblock
   | Vatom_stk of atom * stack
   | Vuniv_level of Univ.universe_level
+  | Vaccu
 
 (** For debugging purposes only *)
 

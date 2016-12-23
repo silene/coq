@@ -44,6 +44,7 @@ extern int drawinstr;
 extern value * coq_sp;
 /* Some predefined pointer code */ 
 extern code_t accumulate;
+extern value accumulate_block;
 
 /* functions over global environment */
 
