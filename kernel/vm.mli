@@ -60,8 +60,6 @@ val val_of_rel : int -> values
 val val_of_named : Id.t -> values
 val val_of_constant : constant -> values
 
-external val_of_annot_switch : annot_switch -> values = "%identity"
-
 (** Destructors *)
 
 val whd_val : values -> whd

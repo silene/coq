@@ -1018,7 +1018,7 @@ value coq_interprete
       Instruct(MAKESWITCHBLOCK) {
 	print_instr("MAKESWITCHBLOCK");
         if (accu == accumulate_block) {
-          pc += 4;
+          ++pc;
         } else {
 	*--sp = accu; // Save matched block on stack
 	accu = Field(accu,1); // Save atom to accu register
@@ -1028,7 +1028,6 @@ value coq_interprete
 	    mlsize_t i, nargs;
 	    print_instr("COFIX_TAG");
 	    sp-=2;
-	    pc++;
             // Push the return address
 	    sp[0] = (value) (pc + *pc);
 	    sp[1] = coq_env;
@@ -1050,14 +1049,13 @@ value coq_interprete
 	  {
 	    print_instr("COFIX_EVAL_TAG");
 	    accu = Field(accu,1);
-	    pc++;
 	    pc = pc + *pc;
 	    sp++;
 	    Next;
 	  }
 	default: 
 	  {  
-            pc += 4;
+            ++pc;
             sp++;
             accu = accumulate_block;
 	  }

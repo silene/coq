@@ -93,34 +93,7 @@ module SConstTable = Hashtbl.Make (struct
   let hash = hash_structured_constant
 end)
 
-let eq_annot_switch asw1 asw2 =
-  let eq_ci ci1 ci2 =
-    eq_ind ci1.ci_ind ci2.ci_ind &&
-    Int.equal ci1.ci_npar ci2.ci_npar &&
-    Array.equal Int.equal ci1.ci_cstr_ndecls ci2.ci_cstr_ndecls
-  in
-  let eq_rlc (i1, j1) (i2, j2) = Int.equal i1 i2 && Int.equal j1 j2 in
-  eq_ci asw1.ci asw2.ci &&
-  Array.equal eq_rlc asw1.rtbl asw2.rtbl &&
-  (asw1.tailcall : bool) == asw2.tailcall
-
-let hash_annot_switch asw =
-  let open Hashset.Combine in
-  let h1 = Constr.case_info_hash asw.ci in
-  let h2 = Array.fold_left (fun h (t, i) -> combine3 h t i) 0 asw.rtbl in
-  let h3 = if asw.tailcall then 1 else 0 in
-  combine3 h1 h2 h3
-
-module AnnotTable = Hashtbl.Make (struct
-  type t = annot_switch
-  let equal = eq_annot_switch
-  let hash = hash_annot_switch
-end)
-
 let str_cst_tbl : int SConstTable.t = SConstTable.create 31
-
-let annot_tbl : int AnnotTable.t = AnnotTable.create 31
-    (* (annot_switch * int) Hashtbl.t  *)
 
 (*************************************************************)
 (*** Mise a jour des valeurs des variables et des constantes *)
@@ -146,13 +119,6 @@ let slot_for_str_cst key =
   with Not_found ->
     let n = set_global (val_of_str_const key) in
     SConstTable.add str_cst_tbl key n;
-    n
-
-let slot_for_annot key =
-  try AnnotTable.find annot_tbl key
-  with Not_found ->
-    let n =  set_global (val_of_annot_switch key) in
-    AnnotTable.add annot_tbl key n;
     n
 
 let rec slot_for_getglobal env kn =
@@ -206,7 +172,6 @@ and slot_for_fv env fv =
 
 and eval_to_patch env (buff,pl,fv) =
   let patch = function
-    | Reloc_annot a, pos -> (pos, slot_for_annot a)
     | Reloc_const sc, pos -> (pos, slot_for_str_cst sc)
     | Reloc_getglobal kn, pos -> (pos, slot_for_getglobal env kn)
   in

@@ -41,9 +41,6 @@ type structured_constant =
 
 type reloc_table = (tag * int) array
 
-type annot_switch =
-   {ci : case_info; rtbl : reloc_table; tailcall : bool; max_stack_size : int}
-
 module Label =
   struct
     type t = int
@@ -77,7 +74,7 @@ type instruction =
   | Kconst of structured_constant
   | Kmakeblock of int * tag
   | Kmakeprod
-  | Kmakeswitchblock of Label.t * Label.t * annot_switch * int
+  | Kmakeswitchblock of Label.t
   | Kswitch of Label.t array * Label.t array
   | Kpushfields of int
   | Kfield of int
@@ -246,9 +243,8 @@ let rec pp_instr i =
   | Kmakeblock(n, m) ->
       str "makeblock " ++ int n ++ str ", " ++ int m
   | Kmakeprod -> str "makeprod"
-  | Kmakeswitchblock(lblt,lbls,_,sz) ->
-      str "makeswitchblock " ++ pp_lbl lblt ++ str ", " ++
-	pp_lbl lbls ++ str ", " ++ int sz
+  | Kmakeswitchblock lbls ->
+      str "makeswitchblock " ++ pp_lbl lbls
   | Kswitch(lblc,lblb) ->
       h 1 (str "switch " ++
 	     prlist_with_sep spc pp_lbl (Array.to_list lblc) ++

@@ -372,8 +372,6 @@ let val_of_named id = val_of_idkey (VarKey id)
 
 let val_of_constant c = val_of_idkey (ConstKey c)
 
-external val_of_annot_switch : annot_switch -> values = "%identity"
-
 let mkrel_vstack k arity =
   let max = k + arity - 1 in
   Array.init arity (fun i -> val_of_rel (max - i))

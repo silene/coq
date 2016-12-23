@@ -757,12 +757,6 @@ let rec compile_constr reloc c sz cont =
       let neblock = max 0 (nallblock - last_variant_tag) in
       let lbl_eblocks = Array.make neblock Label.no in 
       let branch1,cont = make_branch cont in
-      (* Compiling return type *)
-      let fcode =
-        ensure_stack_capacity (compile_constr reloc t sz) [Kpop sz; Kstop]
-      in
-      let lbl_typ,fcode = label_code fcode in
-      fun_code := [Ksequence(fcode,!fun_code)];
       (* Compiling branches *)
       let lbl_sw = Label.create () in
       let sz_b,branch,is_tailcall =
@@ -819,15 +813,10 @@ let rec compile_constr reloc c sz cont =
 	  c := code_b
       done;
 
-      let annot =
-        {ci = ci; rtbl = tbl; tailcall = is_tailcall;
-         max_stack_size = !max_stack_size - sz}
-      in
-
      (* Compiling branch for accumulators *)
       let lbl_accu, code_accu =
         set_max_stack_size (sz+3);
-	label_code(Kmakeswitchblock(lbl_typ,lbl_sw,annot,sz) :: branch :: !c)
+	label_code(Kmakeswitchblock lbl_sw :: branch :: !c)
       in
       lbl_blocks.(0) <- lbl_accu;
 

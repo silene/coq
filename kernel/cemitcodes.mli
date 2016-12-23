@@ -2,7 +2,6 @@ open Names
 open Cbytecodes
 
 type reloc_info =
-  | Reloc_annot of annot_switch
   | Reloc_const of structured_constant
   | Reloc_getglobal of constant
 

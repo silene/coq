@@ -7,10 +7,6 @@ open Vm
 
 let ppripos (ri,pos) =
   (match ri with
-  | Reloc_annot a ->
-      let sp,i = a.ci.ci_ind in
-      print_string
-	("annot : MutInd("^(string_of_mind sp)^","^(string_of_int i)^")\n")
   | Reloc_const _ ->
       print_string "structured constant\n"
   | Reloc_getglobal kn ->

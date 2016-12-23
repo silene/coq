@@ -37,9 +37,6 @@ val pp_struct_const : structured_constant -> Pp.std_ppcmds
 
 type reloc_table = (tag * int) array
 
-type annot_switch =
-   {ci : case_info; rtbl : reloc_table; tailcall : bool; max_stack_size : int}
-
 module Label :
   sig
     type t = int
@@ -74,7 +71,7 @@ type instruction =
                                          ** is accu, all others are popped from
 					 ** the top of the stack  *)
   | Kmakeprod
-  | Kmakeswitchblock of Label.t * Label.t * annot_switch * int
+  | Kmakeswitchblock of Label.t
   | Kswitch of Label.t array * Label.t array (** consts,blocks *)
   | Kpushfields of int
   | Kfield of int                       (** accu = accu[n] *)

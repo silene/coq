@@ -57,12 +57,11 @@ void init_arity () {
     arity[MAKEBLOCK1]=arity[MAKEBLOCK2]=arity[MAKEBLOCK3]=arity[MAKEBLOCK4]=
     arity[MAKEACCU]=arity[CONSTINT]=arity[PUSHCONSTINT]=arity[GRABREC]=
     arity[PUSHFIELDS]=arity[GETFIELD]=arity[SETFIELD]=
-    arity[BRANCH]=arity[ISCONST]=arity[ENSURESTACKCAPACITY]=1;
+    arity[BRANCH]=arity[ISCONST]=arity[ENSURESTACKCAPACITY]=
+    arity[MAKESWITCHBLOCK]=1;
   /* instruction with two operands */
   arity[APPTERM]=arity[MAKEBLOCK]=arity[CLOSURE]=
   arity[ARECONST]=arity[PROJ]=2;
-  /* instruction with four operands */ 
-  arity[MAKESWITCHBLOCK]=4;
   /* instruction with arbitrary operands */
   arity[CLOSUREREC]=arity[CLOSURECOFIX]=arity[SWITCH]=0;
 }

@@ -17,7 +17,6 @@ open Mod_subst
 
 (* Relocation information *)
 type reloc_info =
-  | Reloc_annot of annot_switch
   | Reloc_const of structured_constant
   | Reloc_getglobal of Names.constant
 
@@ -135,10 +134,6 @@ let slot_for_const c =
   enter (Reloc_const c);
   out_int 0
 
-let slot_for_annot a =
-  enter (Reloc_annot a);
-  out_int 0
-
 let slot_for_getglobal p =
   enter (Reloc_getglobal p);
   out_int 0
@@ -210,10 +205,9 @@ let emit_instr = function
       else (out opMAKEBLOCK; out_int n; out_int t)
   | Kmakeprod ->
       out opMAKEPROD
-  | Kmakeswitchblock(typlbl,swlbl,annot,sz) ->
+  | Kmakeswitchblock swlbl ->
       out opMAKESWITCHBLOCK;
-      out_label typlbl; out_label swlbl;
-      slot_for_annot annot;out_int sz
+      out_label swlbl
   | Kswitch (tbl_const, tbl_block) ->
       let lenb = Array.length tbl_block in
       let lenc = Array.length tbl_const in
@@ -321,10 +315,6 @@ let rec subst_strcst s sc =
 
 let subst_patch s (ri,pos) =
   match ri with
-  | Reloc_annot a ->
-      let (kn,i) = a.ci.ci_ind in
-      let ci = {a.ci with ci_ind = (subst_mind s kn,i)} in
-      (Reloc_annot {a with ci = ci},pos)
   | Reloc_const sc -> (Reloc_const (subst_strcst s sc), pos)
   | Reloc_getglobal kn -> (Reloc_getglobal (subst_constant s kn), pos)
 
