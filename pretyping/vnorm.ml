@@ -228,11 +228,6 @@ and nf_stk ?from:(from=0) env c t stk  =
       else
 	let rest = from - nargs vargs in
 	nf_stk ~from:rest env c t stk
-  | Zproj p :: stk ->
-     assert (from = 0) ;
-     let p' = Projection.make p true in
-     let ty = Inductiveops.type_of_projection_knowing_arg env Evd.empty p' c t in
-     nf_stk env (mkProj(p',c)) ty stk
 
 and nf_predicate env ind mip params v pT =
   match whd_val v, kind_of_term pT with

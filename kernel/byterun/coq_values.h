@@ -20,7 +20,6 @@
 #define ATOM_ID_TAG 0
 #define ATOM_INDUCTIVE_TAG 1
 #define ATOM_TYPE_TAG 2
-#define ATOM_PROJ_TAG 3
 #define ATOM_COFIX_TAG 6
 #define ATOM_COFIXEVALUATED_TAG 7
 

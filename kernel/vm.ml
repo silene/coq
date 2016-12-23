@@ -114,7 +114,6 @@ type vstack = values array
 (* + Accumulators : At_[accumulate| accu | arg1 | ... | argn ]            *)
 (*   - representation of [accu] : tag_[....]                              *)
 (*     -- tag <= 3 : encoding atom type (sorts, free vars, etc.)          *)
-(*     -- 10_[accu|proj name] : a projection blocked by an accu           *)
 (*     -- 13_[fcofix]       : a cofix function                            *)
 (*     -- 14_[fcofix|val]   : a cofix function, val represent the value   *)
 (*        of the function applied to arg1 ... argn                        *)
@@ -133,7 +132,6 @@ type atom =
 
 type zipper =
   | Zapp of arguments
-  | Zproj of Constant.t (* name of the projection *)
 
 type stack = zipper list
 
@@ -245,9 +243,6 @@ let rec whd_accu a stk =
      end
   | i when i <= max_atom_tag ->
       Vatom_stk(Obj.magic at, stk)
-  | i when Int.equal i proj_tag ->
-     let zproj = Zproj (Obj.obj (Obj.field at 0)) in
-     whd_accu (Obj.field at 1) (zproj :: stk)
   | i when Int.equal i cofix_tag ->
       let vcfx = Obj.obj (Obj.field at 0) in
       let to_up = Obj.obj a in
@@ -327,15 +322,6 @@ let val_of_obj o = ((Obj.obj o) : values)
 let val_of_str_const str = val_of_obj (obj_of_str_const str)
 
 let val_of_atom a = val_of_obj (obj_of_atom a)
-
-let atom_of_proj kn v =
-  let r = Obj.new_block proj_tag 2 in
-  Obj.set_field r 0 (Obj.repr kn);
-  Obj.set_field r 1 (Obj.repr v);
-  ((Obj.obj r) : atom)
-
-let val_of_proj kn v =
-  val_of_atom (atom_of_proj kn v)
 
 module IdKeyHash =
 struct
@@ -540,7 +526,6 @@ let rec apply_stack a stk v =
   match stk with
   | [] -> apply_varray a [|v|]
   | Zapp args :: stk -> apply_stack (apply_arguments a args) stk v
-  | Zproj kn :: stk -> apply_stack (val_of_proj kn a) stk v
 
 let apply_whd k whd =
   let v = val_of_rel k in
@@ -590,5 +575,4 @@ and pr_stack stk =
       | s :: stk -> pr_zipper s ++ str " :: " ++ pr_stack stk)
 and pr_zipper z =
   Pp.(match z with
-  | Zapp args -> str "Zapp(len = " ++ int (nargs args) ++ str ")"
-  | Zproj c -> str "Zproj(" ++ Names.pr_con c ++ str ")")
+  | Zapp args -> str "Zapp(len = " ++ int (nargs args) ++ str ")")

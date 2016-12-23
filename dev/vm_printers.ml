@@ -43,7 +43,6 @@ let rec ppzipper z =
       done;
       if n-1 >= 0 then ppvalues (arg args (n-1));
       close_box()
-  | Zproj _ -> print_string "Zproj"
 
 and ppstack s =
   open_hovbox 0;

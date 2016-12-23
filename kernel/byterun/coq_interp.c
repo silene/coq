@@ -910,18 +910,9 @@ value coq_interprete
             }
           default:
             {
-              value block;
-              /* Skip over the index of projected field */
-              ++pc;
-              /* Create atom */
-              Alloc_small(accu, 2, ATOM_PROJ_TAG);
-              Field(accu, 0) = Field(coq_global_data, *pc++);
-              Field(accu, 1) = *sp++;
-              /* Create accumulator */
-              Alloc_small(block, 2, Accu_tag);
-              Code_val(block) = accumulate;
-              Field(block, 1) = accu;
-              accu = block;
+              accu = accumulate_block;
+              ++sp;
+              pc += 2;
             }
           }
           }

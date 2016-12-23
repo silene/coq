@@ -28,7 +28,6 @@ type atom =
 
 type zipper =
   | Zapp of arguments
-  | Zproj of Constant.t (* name of the projection *)
 
 type stack = zipper list
 
