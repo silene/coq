@@ -98,7 +98,7 @@ Proof.
 destruct n.
 reflexivity.
 do 8 (destruct p; [ | | intros; vm_compute; reflexivity ]);
- intro H; vm_compute in H; destruct p; discriminate.
+ intro H; destruct p; vm_compute in H; discriminate.
 Qed.
 
 Theorem ascii_nat_embedding :

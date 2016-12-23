@@ -23,7 +23,6 @@ let type_atom_tag = 2
 let max_atom_tag = 2
 let proj_tag = 3
 let fix_app_tag = 4
-let switch_tag = 5
 let cofix_tag = 6
 let cofix_evaluated_tag = 7
 

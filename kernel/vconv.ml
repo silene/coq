@@ -14,8 +14,8 @@ let compare_zipper z1 z2 =
   match z1, z2 with
   | Zapp args1, Zapp args2 -> Int.equal (nargs args1) (nargs args2)
   | Zfix(f1,args1), Zfix(f2,args2) ->  Int.equal (nargs args1) (nargs args2)
-  | Zswitch _, Zswitch _ | Zproj _, Zproj _ -> true
-  | Zapp _ , _ | Zfix _, _ | Zswitch _, _ | Zproj _, _ -> false
+  | Zproj _, Zproj _ -> true
+  | Zapp _ , _ | Zfix _, _ | Zproj _, _ -> false
 
 let rec compare_stack stk1 stk2 =
   match stk1, stk2 with
@@ -126,21 +126,10 @@ and conv_stack env k stk1 stk2 cu =
   | Zfix(f1,args1) :: stk1, Zfix(f2,args2) :: stk2 ->
       conv_stack env k stk1 stk2
 	(conv_arguments env k args1 args2 (conv_fix env k f1 f2 cu))
-  | Zswitch sw1 :: stk1, Zswitch sw2 :: stk2 ->
-      if check_switch sw1 sw2 then
-	let vt1,vt2 = type_of_switch sw1, type_of_switch sw2 in
-	let rcu = ref (conv_val env CONV k vt1 vt2 cu) in
-	let b1, b2 = branch_of_switch k sw1, branch_of_switch k sw2 in
-	for i = 0 to Array.length b1 - 1 do
-	  rcu :=
-	    conv_val env CONV (k + fst b1.(i)) (snd b1.(i)) (snd b2.(i)) !rcu
-	done;
-	conv_stack env k stk1 stk2 !rcu
-      else raise NotConvertible
   | Zproj p1 :: stk1, Zproj p2 :: stk2 ->
     if Constant.equal p1 p2 then conv_stack env k stk1 stk2 cu
     else raise NotConvertible
-  | [], _ | Zapp _ :: _, _ | Zfix _ :: _, _ | Zswitch _ :: _, _
+  | [], _ | Zapp _ :: _, _ | Zfix _ :: _, _
   | Zproj _ :: _, _ -> raise NotConvertible
 
 and conv_fun env pb k f1 f2 cu =

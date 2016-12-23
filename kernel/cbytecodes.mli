@@ -19,7 +19,6 @@ val type_atom_tag : tag
 val max_atom_tag : tag
 val proj_tag : tag
 val fix_app_tag : tag
-val switch_tag : tag
 val cofix_tag : tag
 val cofix_evaluated_tag : tag
 

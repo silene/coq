@@ -1057,43 +1057,9 @@ value coq_interprete
 	  }
 	default: 
 	  {  
-	    mlsize_t sz;
-	    int i, annot;
-	    code_t typlbl,swlbl;
-	    print_instr("MAKESWITCHBLOCK");
-	    
-	    typlbl = (code_t)pc + *pc; 
-	    pc++;
-	    swlbl = (code_t)pc + *pc; 
-	    pc++;
-	    annot = *pc++;
-	    sz = *pc++;
-	    *--sp=Field(coq_global_data, annot);
-	    /* We save the stack */
-	    if (sz == 0) accu = Atom(0);
-	    else {
-	      Alloc_small(accu, sz, Default_tag);
-	      if (Field(*sp, 2) == Val_true) {
-		for (i = 0; i < sz; i++) Field(accu, i) = sp[i+2];
-	      }else{
-		for (i = 0; i < sz; i++) Field(accu, i) = sp[i+5];
-	      }
-	    }
-	    *--sp = accu;
-	    /* We create the switch zipper */
-	    Alloc_small(accu, 5, Default_tag);
-	    Field(accu, 0) =  (value)typlbl; Field(accu, 1) = (value)swlbl; 
-	    Field(accu, 2) = sp[1]; Field(accu, 3) = sp[0]; 
-	    Field(accu, 4) = coq_env;
-	    sp++;sp[0] = accu;
-	    /* We create the atom */
-	    Alloc_small(accu, 2, ATOM_SWITCH_TAG);
-	    Field(accu, 0) = sp[1]; Field(accu, 1) = sp[0];
-	    sp++;sp[0] = accu;
-	    /* We create the accumulator */
-	    Alloc_small(accu, 2, Accu_tag);
-	    Code_val(accu) = accumulate; 
-	    Field(accu,1) = *sp++;
+            pc += 4;
+            sp++;
+            accu = accumulate_block;
 	  }
 	}
         }

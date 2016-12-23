@@ -233,29 +233,6 @@ and nf_stk ?from:(from=0) env c t stk  =
       let fa, typ = nf_fix_app env f vargs in
       let _,_,codom = decompose_prod env typ in
       nf_stk env (mkApp(fa,[|c|])) (subst1 c codom) stk
-  | Zswitch sw :: stk ->
-      assert (from = 0) ;
-      let ((mind,_ as ind), u), allargs = find_rectype_a env t in
-      let (mib,mip) = Inductive.lookup_mind_specif env ind in
-      let nparams = mib.mind_nparams in
-      let params,realargs = Util.Array.chop nparams allargs in
-      let pT =
-	hnf_prod_applist env (type_of_ind env (ind,u)) (Array.to_list params) in
-      let pT = whd_all env pT in
-      let dep, p = nf_predicate env (ind,u) mip params (type_of_switch sw) pT in
-      (* Calcul du type des branches *)
-      let btypes = build_branches_type env ind mib mip u params dep p in
-      (* calcul des branches *)
-      let bsw = branch_of_switch (nb_rel env) sw in
-      let mkbranch i (n,v) =
-	let decl,decl_with_letin,codom = btypes.(i) in
-	let b = nf_val (Termops.push_rels_assum decl env) v codom in
-        Termops.it_mkLambda_or_LetIn_from_no_LetIn b decl_with_letin
-      in
-      let branchs = Array.mapi mkbranch bsw in
-      let tcase = build_case_type dep p realargs c in
-      let ci = case_info sw in
-      nf_stk env (mkCase(ci, p, c, branchs)) tcase stk
   | Zproj p :: stk ->
      assert (from = 0) ;
      let p' = Projection.make p true in

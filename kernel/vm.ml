@@ -80,14 +80,6 @@ type arguments
 type vm_env
 type vstack = values array
 
-type vswitch = {
-    sw_type_code : tcode;
-    sw_code : tcode;
-    sw_annot : annot_switch;
-    sw_stk : vstack;
-    sw_env : vm_env
-  }
-
 (* Representation of values *)
 (* + Products : *)
 (*   -   vprod = 0_[ dom | codom]                                         *)
@@ -124,7 +116,6 @@ type vswitch = {
 (*     -- tag <= 3 : encoding atom type (sorts, free vars, etc.)          *)
 (*     -- 10_[accu|proj name] : a projection blocked by an accu           *)
 (*     -- 11_[accu|fix_app] : a fixpoint blocked by an accu               *)
-(*     -- 12_[accu|vswitch] : a match blocked by an accu                  *)
 (*     -- 13_[fcofix]       : a cofix function                            *)
 (*     -- 14_[fcofix|val]   : a cofix function, val represent the value   *)
 (*        of the function applied to arg1 ... argn                        *)
@@ -144,7 +135,6 @@ type atom =
 type zipper =
   | Zapp of arguments
   | Zfix of vfix*arguments  (* Possibly empty *)
-  | Zswitch of vswitch
   | Zproj of Constant.t (* name of the projection *)
 
 type stack = zipper list
@@ -265,9 +255,6 @@ let rec whd_accu a stk =
       let zfix  =
 	Zfix (Obj.obj (Obj.field fa 1), Obj.obj fa) in
       whd_accu (Obj.field at 0) (zfix :: stk)
-  | i when Int.equal i switch_tag ->
-      let zswitch = Zswitch (Obj.obj (Obj.field at 1)) in
-      whd_accu (Obj.field at 0) (zswitch :: stk)
   | i when Int.equal i cofix_tag ->
       let vcfx = Obj.obj (Obj.field at 0) in
       let to_up = Obj.obj a in
@@ -556,50 +543,6 @@ let bfield b i =
   if 0 <= i && i < (bsize b) then val_of_obj (Obj.field (Obj.repr b) i)
   else invalid_arg "Vm.bfield"
 
-
-(* Functions over vswitch *)
-
-let check_switch sw1 sw2 = sw1.sw_annot.rtbl = sw2.sw_annot.rtbl
-
-let case_info sw = sw.sw_annot.ci
-
-let type_of_switch sw =
-  (* The fun code of types will make sure we have enough stack, so we put 0
-  here. *)
-  push_vstack sw.sw_stk 0;
-  interprete sw.sw_type_code crazy_val sw.sw_env 0
-
-let branch_arg k (tag,arity) =
-  if Int.equal arity 0 then  ((Obj.magic tag):values)
-  else
-    let b, ofs = 
-      if tag < last_variant_tag then Obj.new_block tag arity, 0
-      else
-        let b = Obj.new_block last_variant_tag (arity+1) in
-        Obj.set_field b 0 (Obj.repr (tag-last_variant_tag));
-        b,1 in
-    for i = ofs to ofs + arity - 1 do
-      Obj.set_field b i (Obj.repr (val_of_rel (k+i)))
-    done;
-    val_of_obj b
-
-let apply_switch sw arg =
-  let tc = sw.sw_annot.tailcall in
-  if tc then
-    (push_ra stop;push_vstack sw.sw_stk sw.sw_annot.max_stack_size)
-  else
-    (push_vstack sw.sw_stk sw.sw_annot.max_stack_size;
-     push_ra (popstop_code (Array.length sw.sw_stk)));
-  interprete sw.sw_code arg sw.sw_env 0
-
-let branch_of_switch k sw =
-  let eval_branch (_,arity as ta) =
-    let arg = branch_arg k ta in
-    let v = apply_switch sw arg in
-    (arity, v)
-  in
-  Array.map eval_branch sw.sw_annot.rtbl
-
 (* Apply the term represented by a under stack stk to argument v *)
 (* t = a stk --> t v *)
 let rec apply_stack a stk v =
@@ -628,8 +571,6 @@ let rec apply_stack a stk v =
 		(nargs args) in
 	    a, stk in
       apply_stack a stk v
-  | Zswitch sw :: stk ->
-      apply_stack (apply_switch sw a) stk v
 
 let apply_whd k whd =
   let v = val_of_rel k in
@@ -681,5 +622,4 @@ and pr_zipper z =
   Pp.(match z with
   | Zapp args -> str "Zapp(len = " ++ int (nargs args) ++ str ")"
   | Zfix (f,args) -> str "Zfix(..., len=" ++ int (nargs args) ++ str ")"
-  | Zswitch s -> str "Zswitch(...)"
   | Zproj c -> str "Zproj(" ++ Names.pr_con c ++ str ")")

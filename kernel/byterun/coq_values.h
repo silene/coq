@@ -22,7 +22,6 @@
 #define ATOM_TYPE_TAG 2
 #define ATOM_PROJ_TAG 3
 #define ATOM_FIX_TAG 4
-#define ATOM_SWITCH_TAG 5
 #define ATOM_COFIX_TAG 6
 #define ATOM_COFIXEVALUATED_TAG 7
 

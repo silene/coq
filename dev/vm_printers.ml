@@ -48,7 +48,6 @@ let rec ppzipper z =
       if n-1 >= 0 then ppvalues (arg args (n-1));
       close_box()
   | Zfix _ -> print_string "Zfix"
-  | Zswitch _ -> print_string "Zswitch"
   | Zproj _ -> print_string "Zproj"
 
 and ppstack s =

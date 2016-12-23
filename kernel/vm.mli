@@ -17,7 +17,6 @@ type vfun
 type vfix
 type vcofix
 type vblock
-type vswitch
 type arguments
 
 type atom =
@@ -30,7 +29,6 @@ type atom =
 type zipper =
   | Zapp of arguments
   | Zfix of vfix * arguments  (** might be empty *)
-  | Zswitch of vswitch
   | Zproj of Constant.t (* name of the projection *)
 
 type stack = zipper list
@@ -104,13 +102,6 @@ val reduce_cofix : int -> vcofix -> values array * values array
 val btag  : vblock -> int
 val bsize : vblock -> int
 val bfield : vblock -> int -> values
-
-(** Switch *)
-
-val check_switch : vswitch -> vswitch -> bool
-val case_info : vswitch -> case_info
-val type_of_switch : vswitch -> values
-val branch_of_switch : int -> vswitch -> (int * values) array
 
 (** Apply a value *)
 
