@@ -570,31 +570,13 @@ value coq_interprete
 	    coq_extra_args = Long_val(sp[2]);
 	    sp += 3;
 	  } else {
-	    /* The recursif argument is an accumulator */
-	    mlsize_t num_args, i;
-	    /* Construction of fixpoint applied to its [rec_pos-1] first arguments */
-	    Alloc_small(accu, rec_pos + 2, Closure_tag); 
-	    Field(accu, 1) = coq_env; // We store the fixpoint in the first field
-	    for (i = 0; i < rec_pos; i++) Field(accu, i + 2) = sp[i]; // Storing args
-	    Code_val(accu) = pc;
-	    sp += rec_pos;
-	    *--sp = accu;
-	      /* Construction of the atom */
-	    Alloc_small(accu, 2, ATOM_FIX_TAG);
-	    Field(accu,1) = sp[0];
-	    Field(accu,0)  = sp[1];
-	    sp++; sp[0] = accu;
-	      /* Construction of the accumulator */
-	    num_args = coq_extra_args - rec_pos;
-	    Alloc_small(accu, 2+num_args, Accu_tag);
-	    Code_val(accu) = accumulate;
-	    Field(accu,1) = sp[0]; sp++;
-	    for (i = 0; i < num_args;i++)Field(accu, i + 2) = sp[i];
-	    sp += num_args;
+            /* The recursive argument is an accumulator */
+            sp += 1 + coq_extra_args;
 	    pc = (code_t)(sp[0]);
 	    coq_env = sp[1];
 	    coq_extra_args = Long_val(sp[2]);
 	    sp += 3;
+            accu = accumulate_block;
 	  }
 	}
 	Next;

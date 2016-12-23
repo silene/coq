@@ -228,11 +228,6 @@ and nf_stk ?from:(from=0) env c t stk  =
       else
 	let rest = from - nargs vargs in
 	nf_stk ~from:rest env c t stk
-  | Zfix (f,vargs) :: stk ->
-      assert (from = 0) ;
-      let fa, typ = nf_fix_app env f vargs in
-      let _,_,codom = decompose_prod env typ in
-      nf_stk env (mkApp(fa,[|c|])) (subst1 c codom) stk
   | Zproj p :: stk ->
      assert (from = 0) ;
      let p' = Projection.make p true in

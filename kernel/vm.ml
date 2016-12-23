@@ -115,7 +115,6 @@ type vstack = values array
 (*   - representation of [accu] : tag_[....]                              *)
 (*     -- tag <= 3 : encoding atom type (sorts, free vars, etc.)          *)
 (*     -- 10_[accu|proj name] : a projection blocked by an accu           *)
-(*     -- 11_[accu|fix_app] : a fixpoint blocked by an accu               *)
 (*     -- 13_[fcofix]       : a cofix function                            *)
 (*     -- 14_[fcofix|val]   : a cofix function, val represent the value   *)
 (*        of the function applied to arg1 ... argn                        *)
@@ -134,7 +133,6 @@ type atom =
 
 type zipper =
   | Zapp of arguments
-  | Zfix of vfix*arguments  (* Possibly empty *)
   | Zproj of Constant.t (* name of the projection *)
 
 type stack = zipper list
@@ -250,11 +248,6 @@ let rec whd_accu a stk =
   | i when Int.equal i proj_tag ->
      let zproj = Zproj (Obj.obj (Obj.field at 0)) in
      whd_accu (Obj.field at 1) (zproj :: stk)
-  | i when Int.equal i fix_app_tag ->
-      let fa = Obj.field at 1 in
-      let zfix  =
-	Zfix (Obj.obj (Obj.field fa 1), Obj.obj fa) in
-      whd_accu (Obj.field at 0) (zfix :: stk)
   | i when Int.equal i cofix_tag ->
       let vcfx = Obj.obj (Obj.field at 0) in
       let to_up = Obj.obj a in
@@ -548,27 +541,6 @@ let rec apply_stack a stk v =
   | [] -> apply_varray a [|v|]
   | Zapp args :: stk -> apply_stack (apply_arguments a args) stk v
   | Zproj kn :: stk -> apply_stack (val_of_proj kn a) stk v
-  | Zfix(f,args) :: stk ->
-      let a,stk = 
-	match stk with
-	| Zapp args' :: stk ->
-	    push_ra stop;
-	    push_arguments args';
-	    push_val a;
-	    push_arguments args;
-	    let a =
-	      interprete (fun_code f) (Obj.magic f) (Obj.magic f)
-		(nargs args+ nargs args') in
-	    a, stk
-	| _ -> 
-	    push_ra stop;
-	    push_val a;
-	    push_arguments args;
-	    let a =
-	      interprete (fun_code f) (Obj.magic f) (Obj.magic f)
-		(nargs args) in
-	    a, stk in
-      apply_stack a stk v
 
 let apply_whd k whd =
   let v = val_of_rel k in
@@ -619,5 +591,4 @@ and pr_stack stk =
 and pr_zipper z =
   Pp.(match z with
   | Zapp args -> str "Zapp(len = " ++ int (nargs args) ++ str ")"
-  | Zfix (f,args) -> str "Zfix(..., len=" ++ int (nargs args) ++ str ")"
   | Zproj c -> str "Zproj(" ++ Names.pr_con c ++ str ")")

@@ -13,9 +13,8 @@ let val_of_constr env c =
 let compare_zipper z1 z2 =
   match z1, z2 with
   | Zapp args1, Zapp args2 -> Int.equal (nargs args1) (nargs args2)
-  | Zfix(f1,args1), Zfix(f2,args2) ->  Int.equal (nargs args1) (nargs args2)
   | Zproj _, Zproj _ -> true
-  | Zapp _ , _ | Zfix _, _ | Zproj _, _ -> false
+  | Zapp _ , _ | Zproj _, _ -> false
 
 let rec compare_stack stk1 stk2 =
   match stk1, stk2 with
@@ -123,13 +122,10 @@ and conv_stack env k stk1 stk2 cu =
   | [], [] -> cu
   | Zapp args1 :: stk1, Zapp args2 :: stk2 ->
       conv_stack env k stk1 stk2 (conv_arguments env k args1 args2 cu)
-  | Zfix(f1,args1) :: stk1, Zfix(f2,args2) :: stk2 ->
-      conv_stack env k stk1 stk2
-	(conv_arguments env k args1 args2 (conv_fix env k f1 f2 cu))
   | Zproj p1 :: stk1, Zproj p2 :: stk2 ->
     if Constant.equal p1 p2 then conv_stack env k stk1 stk2 cu
     else raise NotConvertible
-  | [], _ | Zapp _ :: _, _ | Zfix _ :: _, _
+  | [], _ | Zapp _ :: _, _
   | Zproj _ :: _, _ -> raise NotConvertible
 
 and conv_fun env pb k f1 f2 cu =
