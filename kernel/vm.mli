@@ -24,12 +24,7 @@ type atom =
   | Aind of inductive
   | Atype of Univ.universe
 
-(** Zippers *)
-
-type zipper =
-  | Zapp of arguments
-
-type stack = zipper list
+type stack = arguments list
 
 type to_up
 

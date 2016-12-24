@@ -10,16 +10,11 @@ let val_of_constr env c =
 
 (* Test la structure des piles *)
 
-let compare_zipper z1 z2 =
-  match z1, z2 with
-  | Zapp args1, Zapp args2 -> Int.equal (nargs args1) (nargs args2)
-
 let rec compare_stack stk1 stk2 =
   match stk1, stk2 with
   | [], [] -> true
   | z1::stk1, z2::stk2 ->
-      if compare_zipper z1 z2 then compare_stack stk1 stk2
-      else false
+    Int.equal (nargs z1) (nargs z2) && compare_stack stk1 stk2
   | _, _ -> false
 
 (* Conversion *)
@@ -94,7 +89,7 @@ and conv_atom env pb k a1 stk1 a2 stk2 cu =
 	  let ulen = Univ.UContext.size mib.Declarations.mind_universes in
           match stk1 , stk2 with
 	  | [], [] -> assert (Int.equal ulen 0); cu
-	  | Zapp args1 :: stk1' , Zapp args2 :: stk2' ->
+	  | args1 :: stk1', args2 :: stk2' ->
 	     assert (ulen <= nargs args1);
              assert (ulen <= nargs args2);
 	     let u1 = Array.init ulen (fun i -> uni_lvl_val (arg args1 i)) in
@@ -118,9 +113,9 @@ and conv_atom env pb k a1 stk1 a2 stk2 cu =
 and conv_stack env k stk1 stk2 cu =
   match stk1, stk2 with
   | [], [] -> cu
-  | Zapp args1 :: stk1, Zapp args2 :: stk2 ->
+  | args1 :: stk1, args2 :: stk2 ->
       conv_stack env k stk1 stk2 (conv_arguments env k args1 args2 cu)
-  | [], _ | Zapp _ :: _, _ -> raise NotConvertible
+  | [], _ | _ :: _, _ -> raise NotConvertible
 
 and conv_fun env pb k f1 f2 cu =
   if f1 == f2 then cu

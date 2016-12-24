@@ -188,7 +188,7 @@ and nf_univ_args ~nb_univs mk env stk =
   let u =
     if Int.equal nb_univs 0 then Univ.Instance.empty
     else match stk with
-    | Zapp args :: _ ->
+    | args :: _ ->
        let inst =
 	 Array.init nb_univs (fun i -> Vm.uni_lvl_val (arg args i))
        in
@@ -221,7 +221,7 @@ and constr_type_of_idkey env (idkey : Vars.id_key) stk =
 and nf_stk ?from:(from=0) env c t stk  =
   match stk with
   | [] -> c
-  | Zapp vargs :: stk ->
+  | vargs :: stk ->
       if nargs vargs >= from then
 	let t, args = nf_args ~from:from env vargs t in
 	nf_stk env (mkApp(c,args)) t stk

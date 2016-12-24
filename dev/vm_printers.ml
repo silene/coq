@@ -33,16 +33,14 @@ let print_idkey idk =
   | VarKey id -> print_string (Id.to_string id)
   | RelKey i -> print_string "~";print_int i
 
-let rec ppzipper z =
-  match z with
-  | Zapp args ->
-      let n = nargs args in
-      open_hbox ();
-      for i = 0 to n-2 do
-	ppvalues (arg args i);print_string ";";print_space()
-      done;
-      if n-1 >= 0 then ppvalues (arg args (n-1));
-      close_box()
+let rec ppzipper args =
+  let n = nargs args in
+  open_hbox ();
+  for i = 0 to n-2 do
+    ppvalues (arg args i);print_string ";";print_space()
+  done;
+  if n-1 >= 0 then ppvalues (arg args (n-1));
+  close_box()
 
 and ppstack s =
   open_hovbox 0;

@@ -128,12 +128,7 @@ type atom =
   | Aind of inductive
   | Atype of Univ.universe
 
-(* Zippers *)
-
-type zipper =
-  | Zapp of arguments
-
-type stack = zipper list
+type stack = arguments list
 
 type to_up = values
 
@@ -228,12 +223,12 @@ let uni_lvl_val (v : values) : Univ.universe_level =
 let rec whd_accu a stk =
   let stk =
     if Int.equal (Obj.size a) 2 then stk
-    else Zapp (Obj.obj a) :: stk in
+    else Obj.obj a :: stk in
   let at = Obj.field a 1 in
   match Obj.tag at with
   | i when Int.equal i type_atom_tag ->
      begin match stk with
-     | [Zapp args] ->
+     | [args] ->
 	let u = ref (Obj.obj (Obj.field at 0)) in
 	for i = 0 to nargs args - 1 do
 	  u := Univ.Universe.sup !u (Univ.Universe.make (uni_lvl_val (arg args i)))
@@ -247,17 +242,17 @@ let rec whd_accu a stk =
       let vcfx = Obj.obj (Obj.field at 0) in
       let to_up = Obj.obj a in
       begin match stk with
-      | []          -> Vcofix(vcfx, to_up, None)
-      | [Zapp args] -> Vcofix(vcfx, to_up, Some args)
-      | _           -> assert false
+      | []     -> Vcofix(vcfx, to_up, None)
+      | [args] -> Vcofix(vcfx, to_up, Some args)
+      | _      -> assert false
       end
   | i when Int.equal i cofix_evaluated_tag ->
       let vcofix = Obj.obj (Obj.field at 0) in
       let res = Obj.obj a in
       begin match stk with
-      | []          -> Vcofix(vcofix, res, None)
-      | [Zapp args] -> Vcofix(vcofix, res, Some args)
-      | _           -> assert false
+      | []     -> Vcofix(vcofix, res, None)
+      | [args] -> Vcofix(vcofix, res, Some args)
+      | _      -> assert false
       end
   | tg ->
     CErrors.anomaly
@@ -525,7 +520,7 @@ let bfield b i =
 let rec apply_stack a stk v =
   match stk with
   | [] -> apply_varray a [|v|]
-  | Zapp args :: stk -> apply_stack (apply_arguments a args) stk v
+  | args :: stk -> apply_stack (apply_arguments a args) stk v
 
 let apply_whd k whd =
   let v = val_of_rel k in
@@ -572,7 +567,5 @@ and pr_whd w =
 and pr_stack stk =
   Pp.(match stk with
       | [] -> str "[]"
-      | s :: stk -> pr_zipper s ++ str " :: " ++ pr_stack stk)
-and pr_zipper z =
-  Pp.(match z with
-  | Zapp args -> str "Zapp(len = " ++ int (nargs args) ++ str ")")
+      | args :: stk -> str "Zapp(len = " ++ int (nargs args) ++
+                         str ") :: " ++ pr_stack stk)
